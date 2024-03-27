@@ -2,10 +2,10 @@ use vstd::prelude::*;
 
 verus! {
 
-// 1. introduce failing ensures
-// 2. move up assertion
-// 3. fix proof (manual)   `assert(fibo(j) == fibo((j-1) as nat) + fibo((j-2) as nat));`
-// 4. remove dead assertion
+// 1. Trigger "introduce failing ensures" on `ensures`
+// 2. Trigger "move up assertion" on `assert`
+// 3. fix proof (manual) by using explicit fibo definition `assert(fibo(j) == fibo((j-1) as nat) + fibo((j-2) as nat));`
+// 4. Trigger "Remove Redundant Assertion" on `proof`
 
 pub open spec fn fibo(n: nat) -> nat
     decreases n
@@ -15,25 +15,24 @@ pub open spec fn fibo(n: nat) -> nat
 }
 
 proof fn lemma_fibo_is_monotonic(i: nat, j: nat)
-    requires i <= j,
-    ensures fibo(i) <= fibo(j),
-    decreases j - i
+    requires
+        i <= j,
+    ensures
+        fibo(i) <= fibo(j),
+    decreases j - i,
 {
     if i < 2 && j < 2 {
-        assert(fibo(i) <= fibo(j));
     } else if i == j {
-        assert(fibo(i) <= fibo(j));
     } else if i == j - 1 {
         lemma_fibo_is_monotonic(i, (j - 1) as nat);
-        assert(fibo(j) == fibo((j-1) as nat) + fibo((j-2) as nat));
-        assert(fibo(i) <= fibo(j));
     } else {
         lemma_fibo_is_monotonic(i, (j - 1) as nat);
         lemma_fibo_is_monotonic(i, (j - 2) as nat);
-        assert(fibo(i) <= fibo(j));
     };
-    assert(fibo(i) <= fibo(j));
 }
+
+
+
 
 
 
